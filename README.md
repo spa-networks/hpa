@@ -1,7 +1,8 @@
 # Hierarchical Preferential Attachment
 
 [![Build Status](https://travis-ci.org/spa-networks/hpa.svg?branch=master)](https://travis-ci.org/spa-networks/hpa)
-
+[![Coverage Status](https://coveralls.io/repos/github/spa-networks/hpa/badge.svg?branch=master)](https://coveralls.io/github/spa-networks/hpa?branch=master)
+[![DOI](https://zenodo.org/badge/18575/spa-networks/hpa.svg)](https://zenodo.org/badge/latestdoi/18575/spa-networks/hpa)
 
 Various source code for 
 
