@@ -6,7 +6,7 @@ install:
   - pip install -r solver/requirements.txt
   - pip install coveralls  
 
-script: nosetests --with-coverage --cover-erase --cover-package=simplex_networks,hpa_utilities --nocapture --verbosity 2 --no-byte-compile --process-timeout=3
+script: nosetests --with-coverage --cover-erase --cover-package=solver --nocapture --verbosity 2 --no-byte-compile --process-timeout=3
 
 after_success:
   coveralls
