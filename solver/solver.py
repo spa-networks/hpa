@@ -59,6 +59,9 @@ def update_preferential_attachment(state_vec,
              state_vec * range(dim)))
 
 
+update = update_preferential_attachment  # alias
+
+
 def get_sb(p):
     r"""
     Compute the rate of structural birth at all levels.
@@ -236,6 +239,71 @@ def get_ng(r):
     return np.cumsum(np.roll(r, 1))
 
 
+def get_all_rates(p, q):  # helper_function
+    r"""
+    Compute all the growth and birth rate vectors from a p,q vector pairs.
+
+    Parameters
+    ----------
+    p : np.array
+      Probability of creating a new k-structure, for $k=0,...,d+1$.
+      Note that one must have $p_0 = 0$ and $p_{d+1} = 1$.
+    q : np.array
+      Probability of choosing a new node for the selected structures.
+      Note that one must have $q_{d} = 1$ and $q_{d+1}=0$.
+
+    Returns
+    -------
+    (sb, sg, ng, nb) : tuple of floats
+      All growth rates.
+
+    See Also
+    --------
+    get_sb, get_sh, get_ng, get_nb
+    """
+    sb = get_sb(p)
+    sg = get_sg(p)
+    q_prime = get_q_prime(q, sb, sg)
+    r = get_r(q_prime, p)
+    ng = get_ng(r)
+    nb = get_nb(r, q)
+    return sb, sg, ng, nb
+
+
+def solve_hpa(p, q, t_max=1000):  # helper_function
+    r"""
+    Obtain the state vectors of a lenght t_max HPA process.
+
+    Parameters
+    ----------
+    p : np.array
+      Probability of creating a new k-structure, for $k=0,...,d+1$.
+      Note that one must have $p_0 = 0$ and $p_{d+1} = 1$.
+    q : np.array
+      Probability of choosing a new node for the selected structures.
+      Note that one must have $q_{d} = 1$ and $q_{d+1}=0$.
+    t_max : int
+      Number of iterations.
+
+    Returns
+    -------
+    n : list of np.array
+      Unormalized distributions of memberships at all levels.
+    s : list of np.array
+      Unormalized distributions of sizes at all levels.
+    """
+    d = len(p) - 2
+    (sb, sg, ng, nb) = get_all_rates(p, q)
+    init = np.array([0, 1])
+    n = [init.copy() for i in range(d)]
+    s = [init.copy() for i in range(d)]
+    for t in range(1, t_max):
+        for k in range(1, d + 1):
+            s[k - 1] = update(s[k - 1], sb[k], sg[k], t)
+            n[k - 1] = update(n[k - 1], nb[k], ng[k], t)
+    return n, s
+
+
 if __name__ == "__main__":
     # Options parser.
     import argparse as ap
@@ -261,12 +329,7 @@ if __name__ == "__main__":
     q = np.array(args.q)
 
     # Determine all nodal and structural birth / growth rates from p,q.
-    sb = get_sb(p)
-    sg = get_sg(p)
-    q_prime = get_q_prime(q, sb, sg)
-    r = get_r(q_prime, p)
-    ng = get_ng(r)
-    nb = get_nb(r, q)
+    (sb, sg, ng, nb) = get_all_rates(p, q)
 
     # Initialize and run
     state = np.array([0, 1])  # one element with one resource share
